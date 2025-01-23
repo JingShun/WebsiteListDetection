@@ -9,16 +9,24 @@
 
 1. 申請 Google API，取得 googleCertificate.json
 2. 建立 Google Sheet，取得將API服務帳號加入編輯權限
+
+必備工作表與欄位
+
+|工作表|欄位|說明|
+|---|---|---|
+|資產清單|URL|可透過WORKSHEET_ASSET_NAME、ASSET_URL_FIELD_NAME 調整名稱|
+
+ 
 3. 設定 config.ini
 
 |參數|說明|範例|
 |---|---|---|
 |TIMEZONE|時區|預設UTC，台灣請改 Asia/Taipei|
-|GOOGLE_CERTIFICATE_PATH|google證書位置|config/googleCertificate.json|
+|GOOGLE_CERTIFICATE_PATH|google證書相對位置|config/googleCertificate.json|
 |GOOGLE_SHEET_URL|google試算表|https://docs.google.com/spreadsheets/d/1OZkYt.....Db1yQs/edit|
-|WORKSHEET_ASSET_NAME|資產清單||
-|WORKSHEET_DETECT_NAME|檢測結果||
-|ASSET_URL_FIELD_NAME|URL||
+|ASSET_URL_FIELD_NAME|資產清單的網站連結欄位名稱|URL|
+|WORKSHEET_ASSET_NAME|工作表名稱: 資產清單|資產清單|
+|WORKSHEET_DETECT_NAME|工作表名稱: 檢測結果|檢測結果|
 |FIELD_NAME_IP|欄位名稱:DN解析IP，空白則忽略|國外檢測IP|
 |FIELD_NAME_CERT_STATUS|欄位名稱:檢測憑證狀態，空白則忽略|國外憑證狀態|
 |FIELD_NAME_WEB_STATUS|欄位名稱:檢測網站狀態，空白則忽略|國外網站狀態|
