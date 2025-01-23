@@ -5,6 +5,9 @@
 比如說在 分公司、國內(公司外)、國外、弱掃平台主機 上定期執行腳本，
 若發現弱掃主機無法連線，但國內(公司外)卻可以連線，合理判斷網站不小心誤將弱掃平台封鎖了。
 
+![image](https://github.com/user-attachments/assets/0f0cc113-ebd5-4937-91ee-eedc138efe7f)
+
+
 # 使用方法
 
 1. 申請 Google API，取得 googleCertificate.json
