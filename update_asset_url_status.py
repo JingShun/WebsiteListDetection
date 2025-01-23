@@ -17,6 +17,7 @@ urllib3.disable_warnings(category=urllib3.exceptions.InsecureRequestWarning)
 # 設定檔
 config = configparser.ConfigParser()
 config.read("config.ini", encoding="utf-8")
+timezone = config.get("DEFAULT", "TIMEZONE", fallback="UTC")
 
 
 # 連線 Google 試算表
@@ -124,9 +125,9 @@ def back_result_worksheet(spreadsheet: gspread.Spreadsheet):
     """
 
     # 取得 前一天日期
-    __yesterday = (
-        datetime.now(pytz.timezone("Asia/Taipei")) - timedelta(days=1)
-    ).strftime("%Y%m%d")
+    __yesterday = (datetime.now(pytz.timezone(timezone)) - timedelta(days=1)).strftime(
+        "%Y%m%d"
+    )
 
     # 檢查前一天的檢測結果Sheet是否存在，不存在則進行備份
     __sheet_title = config.get("DEFAULT", "WORKSHEET_DETECT_NAME") + __yesterday
@@ -140,10 +141,9 @@ def back_result_worksheet(spreadsheet: gspread.Spreadsheet):
             config.get("DEFAULT", "WORKSHEET_DETECT_NAME")
         )  # 使用工作表名稱
 
-        # 複製資產清單Sheet並創建新Sheet
+        # 複製資產清單Sheet並創建新Sheet到最後面
         __result_sheet = spreadsheet.duplicate_sheet(
             source_sheet_id=__asset_sheet.id,
-            insert_sheet_index=1,
             new_sheet_name=__sheet_title,
         )
 
@@ -360,9 +360,51 @@ def init_ckeck(spreadsheet: gspread.Spreadsheet):
     return True
 
 
+# 刪除逾期的紀錄
+def clear_overdue_backup(spreadsheet: gspread.Spreadsheet, keep_days=0):
+    """刪除逾期的紀錄
+
+    Args:
+        spreadsheet (gspread.Spreadsheet): _description_
+    """
+    current_date = datetime.now(pytz.timezone(timezone))
+    sheet_name_prefix = config.get(
+        "DEFAULT", "WORKSHEET_DETECT_NAME", fallback="檢測結果"
+    )
+
+    if not keep_days:
+        keep_days = int(config.get("BACKUP", "BACKUP_RETENTION_PERIOD", fallback="30"))
+    if not keep_days:
+        return
+
+    # 獲取所有工作表
+    all_sheets = spreadsheet.worksheets()
+
+    # 迴圈檢查每個工作表的名稱
+    for sheet in all_sheets:
+        sheet_name = sheet.title  # 工作表名稱
+        print("\n" + sheet_name + "...", end="")
+        if sheet_name.startswith(sheet_name_prefix):  # 檢查是否符合特定前綴
+            try:
+                # 從名稱中提取日期部分
+                date_str = sheet_name.replace(sheet_name_prefix, "")
+                sheet_date = datetime.strptime(date_str, "%Y%m%d")
+
+                # 計算日期差
+                if current_date - sheet_date > timedelta(days=keep_days):
+                    print("刪除逾期工作表", end="")
+                    spreadsheet.del_worksheet(sheet)  # 刪除工作表
+            except ValueError:
+                # 如果無法解析日期，跳過該工作表
+                print("無法解析日期，跳過", end="")
+    pass
+
+
 # # # # # # # # # # # # # # # # # # # #
 
-print("開始執行於 " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+print(
+    "開始執行於 " + datetime.now(pytz.timezone(timezone)).strftime("%Y-%m-%d %H:%M:%S")
+)
 
 print("連線並存取資料表")
 
@@ -374,6 +416,9 @@ spreadsheet = connect_google_sheet(
 
 # 參數檢查
 init_ckeck(spreadsheet)
+
+# 刪除逾期紀錄
+clear_overdue_backup(spreadsheet)
 
 # 備份昨日結果頁面
 if config.get("DEFAULT", "AUTO_BACKUP", fallback="1"):
@@ -470,11 +515,16 @@ for idx, url in enumerate(urls, start=2):  # 從第2列開始，因為第1列是
     # 更新日期
     if updated_at_col:
         update_sheet_cell(
-            result_worksheet, idx, updated_at_col, datetime.now().strftime("%Y/%m/%d")
+            result_worksheet,
+            idx,
+            updated_at_col,
+            datetime.now(pytz.timezone(timezone)).strftime("%Y/%m/%d %H:%M:%S"),
         )
 
     print("ok")
 
 
 print("檢測完成，結果已更新至Google Sheets。")
-print("完成執行於 " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+print(
+    "完成執行於 " + datetime.now(pytz.timezone(timezone)).strftime("%Y-%m-%d %H:%M:%S")
+)
