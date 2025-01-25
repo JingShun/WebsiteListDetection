@@ -26,7 +26,7 @@
 |---|---|---|
 |TIMEZONE|時區|預設UTC，台灣請改 Asia/Taipei|
 |GOOGLE_CERTIFICATE_PATH|google證書相對位置|config/googleCertificate.json|
-|GOOGLE_SHEET_URL|google試算表|https://docs.google.com/spreadsheets/d/1OZkYt.....Db1yQs/edit|
+|GOOGLE_SHEET_URL|google試算表|https://docs.google.com/spreadsheets/d/.../edit|
 |ASSET_URL_FIELD_NAME|資產清單的網站連結欄位名稱|URL|
 |WORKSHEET_ASSET_NAME|工作表名稱: 資產清單|資產清單|
 |WORKSHEET_DETECT_NAME|工作表名稱: 檢測結果|檢測結果|
